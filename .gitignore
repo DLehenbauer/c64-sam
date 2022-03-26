@@ -1,0 +1,25 @@
+.DS_Store
+out/
+obj/
+*.o
+*.s??
+*.log
+disk/
+
+*.orig
+*.rej
+
+*.c64
+*.pet
+*.prg
+*.d81
+*.d64
+*.lbl
+*.dbg
+*.map
+*.lst
+*~
+*.session
+
+# Keep all artifacts under /lkg/
+!/lkg/**/*

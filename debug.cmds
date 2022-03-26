@@ -1,0 +1,16 @@
+; Scripted commands for debugging with 'make debug'
+load_labels "sam.c64.lbl"
+; Wait until program starts before placing break points
+break ._main
+g
+; Verify these are unused ranges
+break load store exec .Un0s .Un0e
+break load store exec .Un1s .Un1e
+break load store exec .Un2s .Un2e
+break load store exec .Un3s .Un3e
+break load store exec .Un4s .Un4e
+break load store exec .Un5s .Un5e
+break load store exec .Un6s .Un6e
+break load store exec .Un7s .Un7e
+break load store exec .Un8s .Un8e
+break load store exec .Un9s .Un9e

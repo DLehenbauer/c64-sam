@@ -1,0 +1,7 @@
+{
+    "recommendations": [
+        "entan-gl.cc65-vice",
+        "streetsidesoftware.code-spell-checker"
+    ],
+    "unwantedRecommendations": ["sharpninja.cc65", "tlgkccampbell.code-ca65"]
+}

@@ -1,0 +1,8 @@
+{
+    "cc65vice.runAhead": false,
+    "cc65vice.enableCycleCounters": false,
+    
+    "editor.detectIndentation": false,
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true
+}

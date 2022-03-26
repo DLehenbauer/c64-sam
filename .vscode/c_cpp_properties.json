@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${env:USERPROFILE}/.vscode/extensions/entan-gl.cc65-vice-6.1.1/dist/cc65/include/**"
+            ],
+            "cStandard": "c99",
+            "intelliSenseMode": "windows-msvc-x64"
+        }
+    ],
+    "version": 4
+}
