@@ -1573,7 +1573,7 @@ L965b:                                  ; }
 L965e:
     jmp L9716                           ; goto L9716
 
-; Handle ']K'
+; Handle ']K*': Set mouth/throat knobs and recalculate F1 and F2 tables
 L9661:
     jsr S9779_parse_number              ; parse_number()
     lda L9939_found_number
@@ -1594,7 +1594,7 @@ L967d:                                  ; }
     ldy L9935
     jmp L97cc_expect_end_of_stmt        ; goto L97cc_expect_end_of_stmt
 
-; Handle ']L'
+; Handle ']L*': Distinguish between LOAD and LIGHTS
 L968f:
     iny                                 ; Y++
     lda (basic_text_ptr),y              ; basic_text_ptr[Y]
@@ -1604,7 +1604,7 @@ L968f:
     beq L96c5                           ; if (A == 'O') goto L96c5
     jmp L962d_run_old_chrget
 
-; Handle 'P'
+; Handle ']P*': Set 'PITCH' value
 L969d:
     jsr S9779_parse_number              ; parse_number()
     lda L9939_found_number
@@ -1615,7 +1615,7 @@ L96a8:                                  ; }
     sta L9a0f_pitch                     ; pitch = number
     jmp L97cc_expect_end_of_stmt        ; goto L97cc_expect_end_of_stmt
 
-; Handle "]LI"
+; Handle "]LI*": Set 'LIGHTS' on/off
 L96b1:
     jsr S9779_parse_number              ; parse_number()
     lda L9939_found_number
@@ -1626,21 +1626,26 @@ L96bc:                                  ; }
     sta L9a10_lights_enabled            ; lights_enabled = number
     jmp L97cc_expect_end_of_stmt        ; goto L97cc_expect_end_of_stmt
 
-; Handle "]LO"
+; Handle "]LO*": Load RECITER
 L96c5:
     jsr S9940_load_reciter              ; load_reciter
     jmp L97cc_expect_end_of_stmt        ; goto expect_end_of_stmt
 
-; Handle "]R"
-; TODO: Also copy high byte of SAM/RECITER addresses?
+; Handle "]R*": Switch to RECITER (TTS mode)
 L96cb:
+    ; Modifies the target address of the 'jsr's used by "SAY" to call RECITER
+    ; to generate phonemes from text.
+    ;
+    ; TODO: This only modifies the low byte of the pointer since the SAM/RECITER
+    ;       entry points are known to have the same high byte in the C64 memory
+    ;       layout.
     lda #<L9a09_Reciter_ML_entry ; (originally #$09)
     sta L9592
     lda #<L9a06_Recicter_BASIC_entry ; (originally #$06)
     sta L95e5
     jmp L97cc_expect_end_of_stmt        ; goto expect_end_of_stmt
 
-; Handle "]S"
+; Handle "]S": Distinguish between SAM and SPEED
 L96d8:
     iny                                 ; Y++
     lda (basic_text_ptr),y              ; basic_text_ptr[Y]
@@ -1650,15 +1655,21 @@ L96d8:
     beq L96f3                           ; if (A == 'P') goto L96f3
     jmp L962d_run_old_chrget            ; goto run_old_chrget
 
-; Handle "]SA"
+; Handle "]SA*": Switch to SAM (phoneme mode)
 L96e6:
+    ; Modifies the target address of the 'jsr's used by "SAY" to bypass reciter
+    ; and go directly to phoneme parsing and rendering.
+    ;
+    ; TODO: This only modifies the low byte of the pointer since the SAM/RECITER
+    ;       entry points are known to have the same high byte in the C64 memory
+    ;       layout.
     lda #<L9a03_SAM_ML_entry ; (originally #$03)
     sta L9592
     lda #<L9a00_SAM_BASIC_entry ; (originally #$00)
     sta L95e5
     jmp L97cc_expect_end_of_stmt        ; goto expect_end_of_stmt
 
-; Handle "]SP"
+; Handle "]SP*": Set SPEED value
 L96f3:
     jsr S9779_parse_number              ; parse_number()
     lda L9939_found_number
@@ -1669,7 +1680,7 @@ L96fe:                                  ; }
     sta L9a0e_speed                     ; speed = number
     jmp L97cc_expect_end_of_stmt        ; goto expect_end_of_stmt
 
-; Handle "]Q": Uninstall SAM wedge
+; Handle "]Q*": QUIT (uninstall wedge)
 L9707_restore_chrget:
     ; Restore first 3 bytes with original values.
     ; TODO: Single caller: inline at $9658?
@@ -1681,7 +1692,7 @@ L9707_restore_chrget:
     sta CHRGET + 2                      ; Restore 'bne' opcode of 'bne $0079'
     jmp L97cc_expect_end_of_stmt
 
-; Matched "]E"
+; Matched "]E*": Print last ERROR
 L9716:
     lda L9a14_error_pos                 ; A = error_pos
 
@@ -2023,6 +2034,8 @@ L9939_found_number:         .byte $01   ; TODO: Review if .res?
 L993a: ; TODO: Review if .res?
     .byte $45, $ff, $ff, $ff, $ff, $ff
 
+; Loads 'RECITER.PRG' from drive 8 to $7d00 (low memory), then
+; given the user the option to relocate to $c000 (high memory).
 S9940_load_reciter:
     lda #$08
     ldx #$08
